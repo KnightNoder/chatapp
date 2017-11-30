@@ -3,7 +3,14 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 var debug = require('debug')('chat');
+var session = require('express-session');
+var sessionMiddleware = session({secret: "biscuit"})
 
+io.use(function(socket, next){
+  sessionMiddleware(socket.request, socket.request.res, next);
+})
+
+app.use(sessionMiddleware);
 // var session = require('express-session');
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,17 +25,15 @@ app.get('/chat',(req,res)=>{
 
 app.post('/chat',(req,res)=>{
   console.log(req.body.username,'username');
-  req.client['username']= req.body.username;
+  req.session.username = req.body.username;
+  // req.client['username']= req.body.username;
   res.render(__dirname + '/views/index.ejs');
 });
 
 io.on('connection', function (socket) {
-  debug(socket.conn.remoteAddress);
-  socket[socket.conn.remoteAddress] = socket.request.client['username'];
-  debug(socket[socket.conn.remoteAddress],'names ');
   socket.on('chat', function (msg) {
     if(msg){
-    io.emit('chat',socket[socket.conn.remoteAddress]+':'+msg);
+    io.emit('chat',socket.request.session.username+':'+msg);
     }
   });
 });

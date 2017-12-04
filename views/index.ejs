@@ -55,6 +55,7 @@
 <script>
   $(function () {
     var socket = io();
+    var users = [];
     $('form').submit(function () {
       socket.emit('chat', $('#m').val());
       $('#m').val('');
@@ -64,15 +65,43 @@
       $('#messages').append($('<li>').text(msg));
       window.scrollTo(0, document.body.scrollHeight);
     });
+
+    socket.on('user', function(data){
+      console.log('in user');
+      console.log(data.user);
+      users.push(data.user);
+    });
+    var div = document.getElementById('onlineUsers');
+
+    // say that fruits contains all your data
+    
+      ul = document.createElement('ul'); // create an arbitrary ul element
+
+    // loop through the fruits array
+    for (var i in users) {
+      // create an arbitrary li element
+      var li = document.createElement('li'),
+        content = document.createTextNode(users); // create a textnode to the document
+
+      li.appendChild(content); // append the created textnode above to the li element
+      ul.appendChild(li); // append the created li element above to the ul element
+    }
+
+    div.appendChild(ul); // finally the ul element to the div with an id of placeholder
+
   });
 
 </script>
 
 <body>
+    <div id="onlineUsers">
+      </div>
   <ul id="messages"></ul>
   <form action="">
     <input id="m" autocomplete="off" /><button>Send</button>
   </form>
+  
+
 </body>
 
 </html>
